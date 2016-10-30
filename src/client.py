@@ -9,34 +9,34 @@ class ChatFrame(tk.Frame):
     def __init__(self, master=None):
         tk.Frame.__init__(self, master)
         self.publicText = tk.Text(self, width=60, height=20)
-        self.inputText = tk.Text(self, width=40, height=5)
+        self.inputText = tk.Text(self, width=60, height=5)
         self.sendButoon = tk.Button(self, text='send', command=self.__send)
         self.clearButton = tk.Button(self, text='clear', command=self.__clear)
         self.exitButton = tk.Button(self, text='exit', command=self.__exit)
-        self.__create_widgets()
+        self.__createWidgets()
         self.grid()
-        thread.start_new_thread(self.__receive_message, ())
-        client.sendall(client.username)
+        thread.start_new_thread(self.__receiveMessage, ())
+        client.send(client.username)
 
-    def __create_widgets(self):
+    def __createWidgets(self):
         self.publicText.grid(column=0, row=0, columnspan=3)
         self.inputText.grid(column=0, row=1, columnspan=3, rowspan=2)
-        self.sendButoon.grid(column=0, row=3)
+        self.sendButoon.grid(column=2, row=3)
         self.clearButton.grid(column=1, row=3)
-        self.exitButton.grid(column=2, row=3)
+        self.exitButton.grid(column=0, row=3)
 
     def __send(self):
         msg = self.inputText.get(1.0, tk.END).strip()
         if msg is None or len(msg) == 0:
             return
         package = generateRequest('SEND', username, msg)
-        client.sendall(package)
-        self.inputText.delete(0.0, tk.END)
+        client.send(package)
+        self.__clear()
 
     def __clear(self):
-        self.publicText.delete(0.0, tk.END)
+        self.publicText.delete(1.0, tk.END)
 
-    def __receive_message(self):
+    def __receiveMessage(self):
         while True:
             sleep(SLEEP_TIME)
             try:
@@ -60,7 +60,7 @@ class ChatFrame(tk.Frame):
 
     def __exit(self):
         package = generateRequest('EXIT', username)
-        client.sendall(package)
+        client.send(package)
         client.close()
         sys.exit(0)
 
@@ -81,7 +81,7 @@ class ChatClient(socket.socket):
     def receive(self):
         return self.sock.recv(RECV_BUFFER)
 
-    def sendall(self, message):
+    def send(self, message):
         self.sock.sendall(message)
 
 if __name__ == "__main__":

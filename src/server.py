@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
     RECV_BUFFER = 4096
     HOST = 'localhost'
-    PORT = 5000
+    PORT = 8000
     server = ChatServer(HOST, PORT)
     try:
         server.handle_accept()
