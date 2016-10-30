@@ -45,6 +45,7 @@ class ChatFrame(tk.Frame):
         self.sendButoon.grid(column=2, row=3)
         self.clearButton.grid(column=1, row=3)
         self.exitButton.grid(column=0, row=3)
+        self.publicText.insert(tk.INSERT, "Welcome to Chatroom!\n")
 
     def _send(self):
         msg = self.inputText.get(1.0, tk.END).strip()
@@ -77,7 +78,6 @@ class ChatFrame(tk.Frame):
                     time = readTime(req.getTime())
                     output = msg + " (" + time + ") " + "\n"
                     self.publicText.insert(tk.INSERT, output)
-
             except socket.error:
                 continue
 
@@ -114,7 +114,6 @@ if __name__ == "__main__":
     while True:
         package = client.receive()
         req = handleReuest(package)
-        print req.getType()
         if req.getType() != "ERROR":
             break
         print "username illegal, please input a new one"
