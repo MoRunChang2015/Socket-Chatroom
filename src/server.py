@@ -47,7 +47,6 @@ class ChatRoomServer(socket.socket):
             msg = username + " entered the chat room."
             package = generateRequest('SYST', 'Server', msg)
             self.broadcast(package)
-        
         while True:
             package = conn.recv(RECV_BUFFER)
             if not package:
