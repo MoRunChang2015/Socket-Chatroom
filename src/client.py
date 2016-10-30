@@ -16,7 +16,7 @@ class ChatFrame(tk.Frame):
         self.__createWidgets()
         self.grid()
         thread.start_new_thread(self.__receiveMessage, ())
-        client.send(client.username)
+        client.sendall(client.username)
 
     def __createWidgets(self):
         self.publicText.grid(column=0, row=0, columnspan=3)
@@ -30,9 +30,8 @@ class ChatFrame(tk.Frame):
         if msg is None or len(msg) == 0:
             return
         package = generateRequest('SEND', username, msg)
-        client.send(package)
-        self.__clear()
-
+        client.sendall(package)
+        self.inputText.delete(1.0, tk.END)
     def __clear(self):
         self.publicText.delete(1.0, tk.END)
 
@@ -60,7 +59,7 @@ class ChatFrame(tk.Frame):
 
     def __exit(self):
         package = generateRequest('EXIT', username)
-        client.send(package)
+        client.sendall(package)
         client.close()
         sys.exit(0)
 
@@ -81,7 +80,7 @@ class ChatClient(socket.socket):
     def receive(self):
         return self.sock.recv(RECV_BUFFER)
 
-    def send(self, message):
+    def sendall(self, message):
         self.sock.sendall(message)
 
 if __name__ == "__main__":
