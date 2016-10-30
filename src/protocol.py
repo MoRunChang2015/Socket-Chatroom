@@ -62,10 +62,10 @@ class Body(object):
         return self.data
 
     def pack(self):
-        return self.data
+        return self.data.encode('utf-8')
 
     def unpack(self, package):
-        self.data = package
+        self.data = package.decode('utf-8')
 
 
 class Request(Protocol):
@@ -88,7 +88,7 @@ class Request(Protocol):
     def unpack(self, package):
         lines = package.split('\n')
         self.header.unpack(lines[0:4])
-        self.body.unpack(''.join(lines[4:]))
+        self.body.unpack('\n'.join(lines[4:]))
 
     def getType(self):
         return self.header.getType()

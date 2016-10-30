@@ -70,6 +70,8 @@ class ChatFrame(tk.Frame):
                 if req.getType() == 'SEND':
                     msg = req.getData()
                     time = readTime(req.getTime())
+                    print "msg:"
+                    print msg
                     output = req.getName() + "  " + time + "\n" + msg + "\n"
                     self.publicText.insert(tk.INSERT, output)
                 elif req.getType() == 'SYST':
