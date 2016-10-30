@@ -66,7 +66,6 @@ class ChatFrame(tk.Frame):
                 print(package)
                 print LINE
                 req = handleReuest(package)
-                self.tk = tk.Frame
                 # Handle with the package received.
                 if req.getType() == 'SEND':
                     msg = req.getData()
@@ -127,3 +126,4 @@ if __name__ == "__main__":
     app = ChatFrame()
     app.master.title(username + '@chatroom')
     app.mainloop()
+    app._exit()
