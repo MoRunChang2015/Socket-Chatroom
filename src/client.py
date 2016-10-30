@@ -15,6 +15,9 @@ class ChatRoomClient():
         self.sock.connect((host, port))
         self.sock.settimeout(timeout)
 
+    def setUserName(self, username):
+        self.username = username
+
     def close(self):
         self.sock.close()
 
@@ -61,7 +64,7 @@ class ChatFrame(tk.Frame):
                 package = client.receive()
                 print(package)
                 print LINE
-                req = handleReuest(package)        
+                req = handleReuest(package)
                 self.tk = tk.Frame
                 # Handle with the package received.
                 if req.getType() == 'SEND':
@@ -116,13 +119,12 @@ if __name__ == "__main__":
             break
         print "username illegal, please input a new one"
         username = raw_input("Please enter your name: ").strip()
-        
         print LINE
         msg = "Hello, I'm " + username + "."
         package = generateRequest('HELLO', username, msg)
         client.send(package)
 
-
+    client.setUserName(username)
     app = ChatFrame()
     app.master.title(username + '@chatroom')
     app.mainloop()

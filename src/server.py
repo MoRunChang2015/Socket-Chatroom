@@ -37,13 +37,12 @@ class ChatRoomServer(socket.socket):
         if (req.getType() != "HELLO"):
             return
         username = req.getName()
-        print("New connection from %s(%s:%s)." % (username, addr[0], addr[1]))
-
         if self.users.has_key(username):
             package = generateRequest('ERROR', 'Server', "duplicate name")
             conn.sendall(package)
         else:
             self.users[username] = conn
+            print("New connection from %s(%s:%s)." % (username, addr[0], addr[1]))
             msg = username + " entered the chat room."
             package = generateRequest('SYST', 'Server', msg)
             self.broadcast(package)
