@@ -124,25 +124,32 @@ if __name__ == "__main__":
     port = int(sys.argv[2])
     RECV_BUFFER = 4096
     SLEEP_TIME = 0.5
+
+    username = raw_input("Please enter your name: ").strip()
+    client = ChatRoomClient(username)
+    try:
+        client.connect(host, port)
+        print("Connection succeeded.")
+    except Exception as e:
+        print e
+        print("Connection failed.")
+        sys.exit(0)
+    msg = "Hello, I'm " + username + "."
+    package = generateRequest('HELLO', username, msg)
+    client.send(package)
     while True:
+        package = client.receive()
+        req = handleReuest(package)
+        if req.getType() != "ERROR":
+            break
+        print "username illegal, please input a new one"
         username = raw_input("Please enter your name: ").strip()
-        client = ChatRoomClient(username)
-        try:
-            client.connect(host, port)
-            print("Connection succeeded.")
-        except Exception as e:
-            print e
-            print("Connection failed.")
-            sys.exit(0)
+        
         print LINE
         msg = "Hello, I'm " + username + "."
         package = generateRequest('HELLO', username, msg)
         client.send(package)
 
-        package = client.receive()
-        req = handleReuest(package)
-        if req.getType() != "ERROR":
-            break
 
     app = ChatFrame()
     app.master.title(username + '@chatroom')

@@ -28,8 +28,9 @@ class ChatRoomServer(socket.socket):
             conn, addr = self.sock.accept()
             thread.start_new_thread(self.handleUserConnect, (conn, addr))
 
-    def handleUserConnect(self, conn, addr):
-        package = conn.recv(RECV_BUFFER)
+    def handleUserConnect(self, conn, addr, package = 0):
+        if package == 0:
+            package = conn.recv(RECV_BUFFER)
         print package
         print LINE
         req = handleReuest(package)
@@ -41,8 +42,6 @@ class ChatRoomServer(socket.socket):
         if self.users.has_key(username):
             package = generateRequest('ERROR', 'Server', "duplicate name")
             conn.sendall(package)
-            conn.close()
-            return
         else:
             self.users[username] = conn
             msg = username + " entered the chat room."
@@ -66,8 +65,9 @@ class ChatRoomServer(socket.socket):
                 package = generateRequest('SYST', 'Server', msg)
                 self.broadcast(package)
                 return
-            elif req.getType() == "CHANGE":
-                self.handleUserConnect(conn, addr)
+            elif req.getType() == "HELLO":
+                self.handleUserConnect(conn, addr, package)
+                return
 
     def broadcast(self, content):
         for username in self.users:
