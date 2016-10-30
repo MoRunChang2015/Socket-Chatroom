@@ -16,7 +16,9 @@ class ChatFrame(tk.Frame):
         self.__createWidgets()
         self.grid()
         thread.start_new_thread(self.__receiveMessage, ())
-        client.sendall(client.username)
+        msg = "Hello, I'm " + client.username + "."
+        package = generateRequest('HELLO', client.username, msg)
+        client.sendall(package)
 
     def __createWidgets(self):
         self.publicText.grid(column=0, row=0, columnspan=3)
@@ -90,6 +92,7 @@ if __name__ == "__main__":
     host = sys.argv[1]
     port = int(sys.argv[2])
     username = raw_input("Please enter your name: ").strip()
+    print LINE
     RECV_BUFFER = 4096
     SLEEP_TIME = 0.5
     client = ChatClient(username)

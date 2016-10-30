@@ -8,7 +8,7 @@ class ChatServer(socket.socket):
     def __init__(self, host, port):
         super(ChatServer, self).__init__()
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print('Socket created.')
+        print('Socket listen port: ' + str(port) + '.')
         try:
             self.sock.bind((host, port))
         except socket.error:
@@ -16,6 +16,7 @@ class ChatServer(socket.socket):
             sys.exit(0)
         self.sock.listen(5)
         print('Socket listening...')
+        print LINE
         self.users = {}
 
     def handle_accept(self):
@@ -24,7 +25,13 @@ class ChatServer(socket.socket):
             thread.start_new_thread(self.handle_single_connect, (conn, addr))
 
     def handle_single_connect(self, conn, addr):
-        username = conn.recv(RECV_BUFFER)
+        package = conn.recv(RECV_BUFFER)
+        print package
+        print LINE
+        req = handleReuest(package)
+        if (req.getType() != "HELLO"):
+            return
+        username = req.getName()
         print("New connection from %s(%s:%s)." % (username, addr[0], addr[1]))
         self.users[username] = conn
         msg = username + " entered the chat room."
@@ -47,6 +54,7 @@ class ChatServer(socket.socket):
                 msg = username + " exited the chat room."
                 package = generateRequest('SYST', 'Admin', msg)
                 self.broadcast(package)
+                return
 
     def broadcast(self, content):
         for username in self.users:
