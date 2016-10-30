@@ -3,6 +3,7 @@ import sys
 import thread
 import Tkinter as tk
 from time import sleep
+import signal
 from protocol import *
 LINE = "----------------------------------------"
 
@@ -24,7 +25,6 @@ class ChatRoomClient():
     def send(self, message):
         self.sock.sendall(message)
 
-
 class ChatFrame(tk.Frame):
     def __init__(self, master=None):
         tk.Frame.__init__(self, master)
@@ -34,11 +34,16 @@ class ChatFrame(tk.Frame):
         self.clearButton = tk.Button(self, text='clear', command=self._clear)
         self.exitButton = tk.Button(self, text='exit', command=self._exit)
         self._createWidgets()
+        self.send = 0
         self.grid()
         thread.start_new_thread(self._receiveMessage, ())
-        msg = "Hello, I'm " + client.username + "."
-        package = generateRequest('HELLO', client.username, msg)
-        client.send(package)
+        signal.signal(signal.SIGINT, self.handler)
+        '''try:
+            msg = "Hello, I'm " + client.username + "."
+            package = generateRequest('HELLO', client.username, msg)
+            client.send(package)
+        except:
+            pass'''
 
     def _createWidgets(self):
         self.publicText.grid(column=0, row=0, columnspan=3)
@@ -51,9 +56,16 @@ class ChatFrame(tk.Frame):
         msg = self.inputText.get(1.0, tk.END).strip()
         if msg is None or len(msg) == 0:
             return
-        package = generateRequest('SEND', username, msg)
+        if self.send == 0:
+            package = generateRequest('SEND', client.username, msg)
+        else:
+            client.username = msg
+            package = generateRequest('CHANGE', msg, msg)
+            thread.start_new_thread(self._receiveMessage, ())
+            signal.signal(signal.SIGINT, self.handler)
         client.send(package)
         self.inputText.delete(1.0, tk.END)
+        self.send = 0
 
     def _clear(self):
         self.publicText.delete(1.0, tk.END)
@@ -65,7 +77,8 @@ class ChatFrame(tk.Frame):
                 package = client.receive()
                 print(package)
                 print LINE
-                req = handleReuest(package)        self.tk = tk.Frame
+                req = handleReuest(package)        
+                self.tk = tk.Frame
                 # Handle with the package received.
                 if req.getType() == 'SEND':
                     msg = req.getData()
@@ -77,14 +90,30 @@ class ChatFrame(tk.Frame):
                     time = readTime(req.getTime())
                     output = msg + " (" + time + ") " + "\n"
                     self.publicText.insert(tk.INSERT, output)
+                elif req.getType() == "ERROR":
+                    thread.exit()
+                    pass
+
             except socket.error:
                 continue
 
     def _exit(self):
-        package = generateRequest('EXIT', username)
-        client.send(package)
-        client.close()
+        try:
+            package = generateRequest('EXIT', username)
+            client.send(package)
+            client.close()
+        except:
+            pass
         sys.exit(0)
+
+    def handler(self, a, b):
+        print "in handler"
+        self._clear()
+        output = "illegal username"
+        self.publicText.insert(tk.INSERT, output)
+        self.send = 1
+        #self.sendButoon = tk.Button(self, text='change_name', command=self._send)
+        #self._exit()
 
 
 if __name__ == "__main__":
@@ -93,17 +122,28 @@ if __name__ == "__main__":
         sys.exit()
     host = sys.argv[1]
     port = int(sys.argv[2])
-    username = raw_input("Please enter your name: ").strip()
-    print LINE
     RECV_BUFFER = 4096
     SLEEP_TIME = 0.5
-    client = ChatRoomClient(username)
-    try:
-        client.connect(host, port)
-        print("Connection succeeded.")
-    except Exception as e:
-        print("Connection failed.")
-        sys.exit(0)
+    while True:
+        username = raw_input("Please enter your name: ").strip()
+        client = ChatRoomClient(username)
+        try:
+            client.connect(host, port)
+            print("Connection succeeded.")
+        except Exception as e:
+            print e
+            print("Connection failed.")
+            sys.exit(0)
+        print LINE
+        msg = "Hello, I'm " + username + "."
+        package = generateRequest('HELLO', username, msg)
+        client.send(package)
+
+        package = client.receive()
+        req = handleReuest(package)
+        if req.getType() != "ERROR":
+            break
+
     app = ChatFrame()
     app.master.title(username + '@chatroom')
     app.mainloop()

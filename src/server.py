@@ -10,7 +10,7 @@ LINE = "----------------------------------------"
 
 class ChatRoomServer(socket.socket):
     def __init__(self, host, port):
-        super(ChatRoomServer, self).__init__()
+        super(ChatRoomServer, self).__init__() #father class init
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print('Socket binding port: ' + str(port) + '.')
         try:
@@ -37,11 +37,18 @@ class ChatRoomServer(socket.socket):
             return
         username = req.getName()
         print("New connection from %s(%s:%s)." % (username, addr[0], addr[1]))
-        self.users[username] = conn
-        msg = username + " entered the chat room."
-        package = generateRequest('SYST', 'Server', msg)
-        self.broadcast(package)
 
+        if self.users.has_key(username):
+            package = generateRequest('ERROR', 'Server', "duplicate name")
+            conn.sendall(package)
+            conn.close()
+            return
+        else:
+            self.users[username] = conn
+            msg = username + " entered the chat room."
+            package = generateRequest('SYST', 'Server', msg)
+            self.broadcast(package)
+        
         while True:
             package = conn.recv(RECV_BUFFER)
             if not package:
@@ -59,6 +66,8 @@ class ChatRoomServer(socket.socket):
                 package = generateRequest('SYST', 'Server', msg)
                 self.broadcast(package)
                 return
+            elif req.getType() == "CHANGE":
+                self.handleUserConnect(conn, addr)
 
     def broadcast(self, content):
         for username in self.users:
