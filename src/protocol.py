@@ -1,13 +1,15 @@
 from time import time
 from datetime import datetime
 
-class Protocol():
+class Protocol(object):
     def __init__(self):
+        super(Protocol, self).__init__()
         self.header = Header()
         self.dataEntity = DataEntity()
 
-class Header():
+class Header(object):
     def __init__(self):
+        super(Header, self).__init__()
         self.dict = {}
 
     def setTime(self, time):
@@ -48,8 +50,9 @@ class Header():
             self.dict[key] = value
 
 
-class DataEntity():
+class DataEntity(object):
     def __init__(self):
+        super(DataEntity, self).__init__()
         self.data = ''
 
     def setData(self, data):
@@ -88,7 +91,7 @@ class Request(Protocol):
         self.dataEntity.unpack(''.join(lines[4:]))
 
     def getType(self):
-        return self.header.getType
+        return self.header.getType()
 
     def getTime(self):
         if 'time' in self.header.dict.keys():

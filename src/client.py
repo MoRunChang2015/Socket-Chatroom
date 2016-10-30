@@ -4,6 +4,7 @@ import thread
 import Tkinter as tk
 from time import sleep
 from protocol import *
+LINE = "----------------------------------------"
 class ChatFrame(tk.Frame):
     def __init__(self, master=None):
         tk.Frame.__init__(self, master)
@@ -41,17 +42,17 @@ class ChatFrame(tk.Frame):
             try:
                 package = client.receive()
                 print(package)
-                print()
+                print LINE
                 req = handleReuest(package)
                 # Handle with the package received.
                 if req.getType() == 'SEND':
-                    msg = req.geData()
-                    time = readTime(req.get_time())
+                    msg = req.getData()
+                    time = readTime(req.getTime())
                     output = req.getName() + "  " + time + "\n" + msg + "\n"
                     self.publicText.insert(tk.INSERT, output)
                 elif req.getType() == 'SYST':
                     msg = req.getData()
-                    time = readTime(req.get_time())
+                    time = readTime(req.getTime())
                     output = msg + " (" + time + ") " + "\n"
                     self.publicText.insert(tk.INSERT, output)
             except socket.error:

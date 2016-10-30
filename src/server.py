@@ -3,6 +3,7 @@ import sys
 import thread
 from protocol import *
 
+LINE = "----------------------------------------"
 class ChatServer(socket.socket):
     def __init__(self, host, port):
         super(ChatServer, self).__init__()
@@ -28,28 +29,28 @@ class ChatServer(socket.socket):
         self.users[username] = conn
         msg = username + " entered the chat room."
         package = generateRequest('SYST', 'Admin', msg)
-        self.broadcast(username, package)
+        self.broadcast(package)
 
         while True:
             package = conn.recv(RECV_BUFFER)
             if not package:
                 continue
             print(package)
-            print()
+            print LINE
             req = handleReuest(package)
-            if req.get_type() == 'SEND':
-                self.broadcast(username, package)
-            elif req.get_type() == 'EXIT':
+            if req.getType() == 'SEND':
+                self.broadcast(package)
+            elif req.getType() == 'EXIT':
                 self.users.pop(req.getName())
                 print("Connection with %s(%s:%s) ended." %
                       (username, addr[0], addr[1]))
                 msg = username + " exited the chat room."
                 package = generateRequest('SYST', 'Admin', msg)
-                self.broadcast(username, package)
+                self.broadcast(package)
 
-    def broadcast(self, username, content):
-        for name, conn in self.users.items():
-            conn.sendall(content)
+    def broadcast(self, content):
+        for username in self.users:
+            self.users[username].sendall(content)
 
 
 if __name__ == "__main__":
