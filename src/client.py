@@ -38,12 +38,14 @@ class ChatFrame(tk.Frame):
         self.grid()
         thread.start_new_thread(self._receiveMessage, ())
         signal.signal(signal.SIGINT, self.handler)
-        '''try:
+        '''
+        try:
             msg = "Hello, I'm " + client.username + "."
             package = generateRequest('HELLO', client.username, msg)
             client.send(package)
         except:
-            pass'''
+            pass
+        '''
 
     def _createWidgets(self):
         self.publicText.grid(column=0, row=0, columnspan=3)
@@ -77,7 +79,7 @@ class ChatFrame(tk.Frame):
                 package = client.receive()
                 print(package)
                 print LINE
-                req = handleReuest(package)        
+                req = handleReuest(package)
                 self.tk = tk.Frame
                 # Handle with the package received.
                 if req.getType() == 'SEND':
@@ -144,12 +146,10 @@ if __name__ == "__main__":
             break
         print "username illegal, please input a new one"
         username = raw_input("Please enter your name: ").strip()
-        
         print LINE
         msg = "Hello, I'm " + username + "."
         package = generateRequest('HELLO', username, msg)
         client.send(package)
-
 
     app = ChatFrame()
     app.master.title(username + '@chatroom')
