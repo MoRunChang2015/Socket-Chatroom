@@ -3,28 +3,32 @@ import sys
 import thread
 from protocol import *
 
+RECV_BUFFER = 4096
+HOST = 'localhost'
+PORT = 8000
 LINE = "----------------------------------------"
-class ChatServer(socket.socket):
+
+class ChatRoomServer(socket.socket):
     def __init__(self, host, port):
-        super(ChatServer, self).__init__()
+        super(ChatRoomServer, self).__init__()
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print('Socket listen port: ' + str(port) + '.')
+        print('Socket binding port: ' + str(port) + '.')
         try:
             self.sock.bind((host, port))
         except socket.error:
             print('Bind failed.')
             sys.exit(0)
         self.sock.listen(5)
-        print('Socket listening...')
+        print('Socket listening on port: ' + str(port) + '...')
         print LINE
         self.users = {}
 
-    def handle_accept(self):
+    def handleSocketAccept(self):
         while True:
             conn, addr = self.sock.accept()
-            thread.start_new_thread(self.handle_single_connect, (conn, addr))
+            thread.start_new_thread(self.handleUserConnect, (conn, addr))
 
-    def handle_single_connect(self, conn, addr):
+    def handleUserConnect(self, conn, addr):
         package = conn.recv(RECV_BUFFER)
         print package
         print LINE
@@ -35,7 +39,7 @@ class ChatServer(socket.socket):
         print("New connection from %s(%s:%s)." % (username, addr[0], addr[1]))
         self.users[username] = conn
         msg = username + " entered the chat room."
-        package = generateRequest('SYST', 'Admin', msg)
+        package = generateRequest('SYST', 'Server', msg)
         self.broadcast(package)
 
         while True:
@@ -52,7 +56,7 @@ class ChatServer(socket.socket):
                 print("Connection with %s(%s:%s) ended." %
                       (username, addr[0], addr[1]))
                 msg = username + " exited the chat room."
-                package = generateRequest('SYST', 'Admin', msg)
+                package = generateRequest('SYST', 'Server', msg)
                 self.broadcast(package)
                 return
 
@@ -62,13 +66,9 @@ class ChatServer(socket.socket):
 
 
 if __name__ == "__main__":
-
-    RECV_BUFFER = 4096
-    HOST = 'localhost'
-    PORT = 8000
-    server = ChatServer(HOST, PORT)
+    server = ChatRoomServer(HOST, PORT)
     try:
-        server.handle_accept()
+        server.handleSocketAccept()
     except KeyboardInterrupt:
         print("Server shutdown.")
     finally:
