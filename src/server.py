@@ -28,24 +28,25 @@ class ChatRoomServer(socket.socket):
             conn, addr = self.sock.accept()
             thread.start_new_thread(self.handleUserConnect, (conn, addr))
 
-    def handleUserConnect(self, conn, addr, package = 0):
-        if package == 0:
+    def handleUserConnect(self, conn, addr):
+        while (True):
             package = conn.recv(RECV_BUFFER)
-        print package
-        print LINE
-        req = handleReuest(package)
-        if (req.getType() != "HELLO"):
-            return
-        username = req.getName()
-        if self.users.has_key(username):
-            package = generateRequest('ERROR', 'Server', "duplicate name")
-            conn.sendall(package)
-        else:
-            self.users[username] = conn
-            print("New connection from %s(%s:%s)." % (username, addr[0], addr[1]))
-            msg = username + " entered the chat room."
-            package = generateRequest('SYST', 'Server', msg)
-            self.broadcast(package)
+            print package
+            print LINE
+            req = handleReuest(package)
+            if (req.getType() != "HELLO"):
+                return
+            username = req.getName()
+            if self.users.has_key(username):
+                package = generateRequest('ERROR', 'Server', "duplicate name")
+                conn.sendall(package)
+            else:
+                self.users[username] = conn
+                print("New connection from %s(%s:%s)." % (username, addr[0], addr[1]))
+                msg = username + " entered the chat room."
+                package = generateRequest('SYST', 'Server', msg)
+                self.broadcast(package)
+                break
         while True:
             package = conn.recv(RECV_BUFFER)
             if not package:
@@ -62,9 +63,6 @@ class ChatRoomServer(socket.socket):
                 msg = username + " exited the chat room."
                 package = generateRequest('SYST', 'Server', msg)
                 self.broadcast(package)
-                return
-            elif req.getType() == "HELLO":
-                self.handleUserConnect(conn, addr, package)
                 return
 
     def broadcast(self, content):
