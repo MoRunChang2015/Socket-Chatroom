@@ -1,5 +1,6 @@
 # Socket-Chatroom
 A simple chatroom using customized Application layer protocol
++ requestment: **python-tk** (install command in Ubuntu: `apt-get python-tk`)
 
 ### Usage
 **start server**
@@ -12,5 +13,3 @@ server listening 8000 port.
 ```
 python src/client.py <server's host> <server's port>
 ```
-
-
