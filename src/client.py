@@ -36,8 +36,12 @@ class ChatFrame(tk.Frame):
         self.clearButton = tk.Button(self, text='clear', command=self._clear)
         self.exitButton = tk.Button(self, text='exit', command=self._exit)
         self._createWidgets()
+        self.setStyle()
         self.grid()
         thread.start_new_thread(self._receiveMessage, ())
+
+    def setStyle(self):
+        pass
 
     def _createWidgets(self):
         self.publicText.grid(column=0, row=0, columnspan=3)
