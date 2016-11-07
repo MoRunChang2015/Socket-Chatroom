@@ -5,9 +5,9 @@ A simple chatroom using customized Application layer protocol
 ### Usage
 **start server**
 ```
-python src/server.py
+python src/server.py <port>
 ```
-server listening 8000 port.
+server default listening 8000 port.
 
 **start client**
 ```

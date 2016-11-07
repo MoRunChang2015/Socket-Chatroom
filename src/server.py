@@ -71,10 +71,13 @@ class ChatRoomServer(socket.socket):
 
 
 if __name__ == "__main__":
+    if (len(sys.argv) == 2):
+        PORT = int(sys.argv[1])
     server = ChatRoomServer(HOST, PORT)
     try:
         server.handleSocketAccept()
     except KeyboardInterrupt:
+        print
         print("Server shutdown.")
     finally:
         server.close()
